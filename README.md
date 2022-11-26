@@ -13,272 +13,201 @@
 
 # Шаг 1
 
-Из прошлого задания вы уже знаете, что у нас будут объявления и категории. А в этом уроке вы научились их связывать. 
-
-Но это еще не всё! Также в этой домашке мы добавим пользователей и их локации. 
-
-1. Используя знания из урока, подключите к вашему проекту PostgreSQL.
-2. Изучите предложенный вам [датасет](https://github.com/skypro-008/lesson28_project_sourse/tree/main/datasets), создайте по нему модели и загрузите данные в таблицы. HINT: некоторые модели и поля у вас уже есть, так что можно дописать только то, чего недостает. А вот данные придется удалить и залить заново.
-3. Не забудьте про админку! Ваши модели должны быть с русскими названиями, а в качестве ссылки на запись должны отображаться:
-    1. для категории — `name`,
-    2. для локации — `name`,
-    3. для пользователя — `username`,
-    4. для объявления — `name.`
-    
-    HINT: Мы обсуждали, как это делается, в уроке 27, часть 2.
-    
+Перепишите модель пользователя так, чтобы она наследовалась от AbstraсtUser.
 
 # Шаг 2
 
-Перепишите свои View на наследников ListView, DetailView и CreateView (в зависимости от назначения каждой из них) и реализуйте недостающие для категорий и объявлений методы: 
+Добавьте в приложение авторизацию по JWT.
 
-- для  `/cat/:id` — методы PATCH/DELETE,
-- для `/ad/:id` — методы PATCH/DELETE.
+Должно получиться следующее:
 
-```
-json
+```json
 Request
-PATCH /cat/1/update/
-
+POST /user/token/
 {
-	"name": "Молочная продукция"
+	"username": "user",
+	"password": "password",
 }
 
 Response
 200
 {
-	"id": 1,
-	"name": "Молочная продукция"
+    "refresh": "JWT_token",
+    "access": "JWT_token"
+}
+
+400 
+{
+    "username": [
+        "This field is required."
+    ],
+    "password": [
+        "This field is required."
+    ]
 }
 
 Request
-PATCH /ad/1/update/
+POST /user/token/
 {
-	"name": "Толстовка",
-	"author_id": 1,
-	"price": 500,
-	"description": "Продаю кофту на рост 115 см по всем вопросам пишите", 
-	"category_id": 1
+	"username": "user",
+	"password": "password",
+	"refresh":  "JWT_token"
 }
 
 Response
 200
 {
-	"id": 1,
-	"name": "Толстовка",
-	"author_id": 1,
-	"author": "Мария",
-	"price": 500,
-	"description": "Продаю кофту на рост 115 см по всем вопросам пишите", 
-	"is_published": True,
-	"category_id": 1,
-	"image": "ads/image.png"
+    "refresh": "JWT_token",
+    "access": "JWT_token"
 }
 
-Request
-DELETE /cat/1/delete/
-
-Response
+400 
 {
-	"status": "ok"
-}
-
-Request
-DELETE /ad/1/delete/
-
-Response
-{
-	"status": "ok"
+    "refresh": [
+        "This field is required."
+    ],
+    "password": [
+        "This field is required."
+    ]
 }
 ```
-
-После этого список `urlpatterns` станет достаточно большим, так что если вы храните его в главном файле `[urls.py](http://urls.py)`, то создайте в своем приложении еще один и перенести все URL приложения в него, как мы делали это на уроке.
-
-И не забудьте добавить отображение новых полей во view для объявлений!
 
 # Шаг 3
 
-Добавьте URL `/ad/1/upload_image` для загрузки картинок к объявлениям аналогично тому, как мы делали это в уроке.
-
-Должно получиться вот так:
-
-```
-json
-Request
-POST /ad/1/upload_image/
-ContentType 'multipart/form-data'
-FILES: "image" 
-
-Response
-200
-{
-	"id": 1,
-	"name": "Толстовка",
-	"author_id": 1,
-	"author": "Мария",
-	"price": 500,
-	"description": "Продаю кофту на рост 115 см по всем вопросам пишите"
-	"is_published": True,
-	"category_id": 1,
-	"image": "ads/image.png"
-} 
-```
-
-Кстати, для записей, которые у вас уже лежа в базе у нас есть [картинки](https://github.com/skypro-008/PD_008_course5/tree/main/images). Потренироваться с отображением можно на них.
+Скройте возможность просмотра детальной информации объявлений для неавторизованных пользователей. Теперь смотреть карточку объявления могут только те, кто зарегистрировался и вошел в свой аккаунт.  
 
 # Шаг 4
 
-Добавьте пагинацию в отображение списков объявлений. У вас должно получиться следующее: 
+Еще одна бизнес-хотелка: подборки объявлений. 
 
-```
-json
+Авторизованные пользователи способны создавать подборки объявлений: можно сделать название и накидать в подборку несколько разных объявлений. Просматривать эти подборки могут все, а вот создавать, редактировать и удалять — только авторизованные пользователи. Менять, естественно, можно только свою подборку.
+
+Реализуйте эту функцию с помощью GenericAPIView. Спецификация ниже: 
+
+```json
 Request
-GET /ad/
+GET /selection/
 
 Response
 200
 {
-	"items":
-		[
-			{
-					"id": 1,
-					"name": "Толстовка",
-					"author_id": 1,
-					"author": "Мария",
-					"price": 500,
-					"description": "Продаю кофту на рост 115 см по всем вопросам пишите",
-					"is_published": True,
-					"category_id": 1,
-					"image": "ads/image.png"
-			} 
-			...
-		]
-	"total": 20,
-	"num_pages": 10
-} 
+    "count": 4,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+						"id": 1,
+						"name": "Подборка Васи"
+				},
+				{
+						"id": 2,
+						"name": "Подборка Пети"
+				},
+    ]
+}
+```
+
+```json
+Request
+GET /selection/1/
+
+Response
+200
+{
+    "id": 1,
+    "items": [
+        {
+            "id": 18,
+            "name": "FSDFDS",
+            "price": 123,
+            "description": "SDFSAF",
+            "is_published": false,
+            "image": null,
+            "author": 4,
+            "category": 1
+        },
+        {
+            "id": 19,
+            "name": "dadsfa",
+            "price": 18,
+            "description": "sdfds",
+            "is_published": true,
+            "image": null,
+            "author": 4,
+            "category": null
+        }
+    ],
+    "name": "Подборка Васи",
+    "owner": 19
+}
+
+404
+{
+	"error": "Not Found"
+}
+
+```
+
+```json
+Request
+POST /selection/create/
+{
+	"name": "Подборка Васи",
+	"owner": 19,
+	"items": [18]
+}
+
+Response
+200
+{
+  "id": 1,
+	"name": "Подборка Васи",
+	"owner": 19,
+	"items": [18]
+}
+
+404 
+{
+    "detail": "Not found."
+}
+
+```
+
+```json
+Request
+PATCH /selection/3/update/
+{
+	"name": "Подборка Васи",
+	"owner": 19,
+	"items": [18, 19]
+}
+
+Response
+200
+{
+  "id": 3,
+	"name": "Подборка Васи",
+	"owner": 19,
+	"items": [18, 19]
+}
+
+404
+{
+    "detail": "Not found."
+}
+```
+
+```json
+Request
+DELETE /selection/1/
+
+Response
+204
 ```
 
 # Шаг 5
 
-Реализуйте CRUD для пользователей. Не забудьте сделать добавление локации при создании и редактировании профиля, чтобы пользователи не мучались.
+Ну и последнее на сегодня: найдите ручки, которые отвечали за редактирование и удаление объявлений. Эти ручки нужно оставить доступными по следующим условиям: 
 
-NOTE: подумайте, так ли сильно связаны пользователи с объявлениями? или они могут жить отдельно?
-
-```
-json
-Request
-GET /user/
-
-Response
-200
-{
-	"items":
-		[
-			{
-				"id": 1,
-				"username": "palexandrov",
-				"first_name": "Павел",
-				"last_name": "Александров",
-				"role": "member",
-				"age": 18,
-				"locations": [
-						"Москва",  # поле name из location
-				]
-			},
-			...
-		],
-	"total": 20,
-	"num_pages": 10
-}
-
-Request
-GET /user/1/
-
-Response
-200
-{
-	"id": 1,
-	"username": "palexandrov",
-	"first_name": "Павел",
-	"last_name": "Александров",
-	"role": "member",
-	"age": 18,
-	"locations": [
-			"Москва",  # поле name из location
-	]
-}
-
-404
-
-Request
-POST /user/create/
-{
-	"username": "palexandrov",
-	"password": "password",
-	"first_name": "Павел",
-	"last_name": "Александров",
-	"role": "member",
-	"age": 18,
-  "locations": ["Москва", "м. Авиастроительная"]
-}
-
-Response
-200
-{
-	"id": 1,
-	"username": "palexandrov",
-	"first_name": "Павел",
-	"last_name": "Александров",
-	"role": "member",
-	"age": 18,
-	"locations": [
-			"Москва",  # поле name из location
-			"м. Авиастроительная"
-	]
-}
-
-Request
-PATCH /user/1/update/
-{
-	"username": "palexandrov",
-	"password": "password",
-	"first_name": "Павел",
-	"last_name": "Александров",
-	"age": 18,
-  "locations": ["Москва", "м. Авиастроительная"]
-}
-
-Response
-200
-{
-	"id": 1,
-	"username": "palexandrov",
-	"first_name": "Павел",
-	"last_name": "Александров",
-	"age": 18,
-	"locations": [
-			"Москва",  # поле name из location
-			"м. Авиастроительная"
-	]
-}
-
-Request
-DELETE /user/1/delete/
-
-Response
-{
-	"status": "ok"
-}
-```
-
-# Шаг 6
-
-Давайте еще добавим сортировок: 
-
-- для пользователей: пользователи должны по умолчанию сортироваться по полю `username` (по алфавиту);
-- для объявлений: только при выдаче списка объявлений сортируйте их по убыванию цены (сначала самые дорогие);
-- для категорий: только при выдаче списка категорий сортируйте их по полю `name` (по алфавиту).
-
-# Шаг 7
-
-Добавьте в список пользователей поле с количеством опубликованных пользователем объявлений (`is_published=True`). Должно получиться вот так:
+- либо это объявление принадлежит текущему пользователю (он его создавал);
+- либо пользователь, который пытается поменять или удалить объявление, является модератором или админом.
