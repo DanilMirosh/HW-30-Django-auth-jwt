@@ -4,10 +4,13 @@ from ads.models.location import Location
 
 
 class User(models.Model):
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    MEMBER = 'member'
     ROLES = [
-        ('admin', 'администратор'),
-        ('member', 'пользователь'),
-        ('moderator', 'модератор')
+        (ADMIN, 'администратор'),
+        (MODERATOR, 'модератор'),
+        (MEMBER, 'пользователь')
     ]
 
     first_name = models.CharField(max_length=100, null=True)
