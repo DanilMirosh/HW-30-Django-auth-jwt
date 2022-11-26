@@ -13,7 +13,8 @@ class AdListView(ListAPIView):
     serializer_class = AdSerializer
 
     def get(self, request, *args, **kwargs):
-        # Filter by id
+
+        # Filter by category id
         categories = request.GET.getlist('cat', None)
         cat_query = None
 
@@ -21,16 +22,16 @@ class AdListView(ListAPIView):
             if cat_query is None:
                 cat_query = Q(category__id__exact=cat_id)
             else:
-                cat_query = cat_query | Q(category__id__exact=cat_id)
+                cat_query |= Q(category__id__exact=cat_id)
 
         if cat_query:
             self.queryset = self.queryset.filter(cat_query)
 
         # Filter by ad text
-        ad_text = request.GET.get('ad_text', None)
-        if ad_text:
+        ad_name = request.GET.get('text', None)
+        if ad_name:
             self.queryset = self.queryset.filter(
-                text__icontains=ad_text
+                name__icontains=ad_name
             )
 
         # Filter by user location
