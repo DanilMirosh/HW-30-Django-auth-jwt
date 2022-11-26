@@ -10,7 +10,7 @@ class SelectionSerializer(serializers.ModelSerializer):
 
 
 class SelectionCreateSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
+    id = serializers.IntegerField(required=False)
 
     class Meta:
         model = Selection

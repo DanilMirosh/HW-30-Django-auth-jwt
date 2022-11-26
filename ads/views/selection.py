@@ -6,7 +6,7 @@ from ads.serializers.selection import SelectionSerializer, SelectionCreateSerial
 
 
 class SelectionListView(ListAPIView):
-    """Display all selection"""
+    """Display all selections"""
     queryset = Selection.objects.all()
     serializer_class = SelectionSerializer
 
@@ -19,20 +19,20 @@ class SelectionDetailView(RetrieveAPIView):
 
 class SelectionCreateView(CreateAPIView):
     """Create new selection"""
-    queryset = Selection.object.all()
+    queryset = Selection.objects.all()
     serializer_class = SelectionCreateSerializer
     permission_classes = [IsAuthenticated]
 
 
 class SelectionUpdateView(UpdateAPIView):
     """Update add by id"""
-    queryset = Selection.object.all()
+    queryset = Selection.objects.all()
     serializer_class = SelectionUpdateSerializer
     permission_classes = [IsAuthenticated, IsCreatedBy]
 
 
 class SelectionDeleteView(DestroyAPIView):
-    """Update add by id"""
-    queryset = Selection.object.all()
+    """Delete selection by id"""
+    queryset = Selection.objects.all()
     serializer_class = SelectionSerializer
     permission_classes = [IsAuthenticated, IsCreatedBy]

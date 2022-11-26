@@ -22,11 +22,10 @@ urlpatterns = [
     path('cat/<int:pk>/delete/', CategoryDeleteView.as_view()),
     path('cat/create/', CategoryCreateView.as_view()),
     path('selection/', SelectionListView.as_view()),
-    path('selection/<int: pk>/', SelectionDetailView.as_view()),
-    path('selection/<int: pk>/update/', SelectionUpdateView.as_view()),
-    path('selection/<int: pk>/delete/', SelectionDeleteView.as_view()),
+    path('selection/<int:pk>/', SelectionDetailView.as_view()),
+    path('selection/<int:pk>/update/', SelectionUpdateView.as_view()),
+    path('selection/<int:pk>/delete/', SelectionDeleteView.as_view()),
     path('selection/create/', SelectionCreateView.as_view()),
-
 ]
 
 urlpatterns += router.urls
