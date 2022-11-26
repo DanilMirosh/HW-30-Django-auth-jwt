@@ -2,7 +2,7 @@ from rest_framework import permissions
 from users.models import User
 
 
-class IsCreateByOrAdminOrModerator(permissions.BasePermission):
+class IsCreatedByOrAdminOrModerator(permissions.BasePermission):
     message = 'Only user who created hte ad, admin and moderators cloud modify or delete it.'
 
     def has_object_permission(self, request, view, obj):
